@@ -330,3 +330,10 @@ type listing struct {
 		return
 	}
 ```
+### Request validation
+most popular validation library `go-playground/validator`
+
+### Blackbox testing / API testing
+1. Write tests
+2. Execute tests
+3. Results

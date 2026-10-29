@@ -9,16 +9,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/bhuiyanmarzan/olx-api/internal/config"
-	"github.com/bhuiyanmarzan/olx-api/internal/db"
-	"github.com/bhuiyanmarzan/olx-api/internal/handlers"
-	"github.com/bhuiyanmarzan/olx-api/internal/middleare"
+	"github.com/bhuiyanmarzan/olx-api/internal/modules/health"
+	"github.com/bhuiyanmarzan/olx-api/internal/platform/config"
+	"github.com/bhuiyanmarzan/olx-api/internal/platform/database"
+	"github.com/bhuiyanmarzan/olx-api/internal/platform/middleware"
 )
 
 func main() {
 	cfg := config.MustLoad()
 
-	db, err := db.Connect(cfg.DatabaseURL)
+	_, err := database.Connect(cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("main.db.connect: %v", err)
 	}
@@ -34,15 +34,23 @@ func main() {
 	fmt.Println("database connected")
 	fmt.Println("starting olx server...")
 
-	lh := handlers.NewListingHandler(db, logger)
-
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /healthz", handlers.Health)
-	mux.HandleFunc("GET /listings", lh.List)
-	mux.HandleFunc("DELETE /listings/{id}", lh.Delete)
-	mux.HandleFunc("POST /listings", lh.Create)
 
-	handler := middleare.RequestId(mux)
+	healthModule := health.NewModule()
+	healthModule.RegisterRoutes(mux)
+
+	// Global middlewares
+	rateLimiter, err := middleware.NewIPRateLimiter(middleware.RateLimiterConfig{
+		RequestsPerMinute: cfg.RateLimitRPM,
+		Burst:             cfg.RateLimitBurst,
+		TrustedProxyCIDRs: cfg.TrustedProxyCIDRs,
+		SkipPaths:         []string{"/healthz"},
+	})
+	if err != nil {
+		log.Fatalf("rate limiter configuration: %v", err)
+	}
+
+	handler := middleware.RequestId(rateLimiter.Limit(mux))
 
 	srv := http.Server{
 		Addr:         ":" + cfg.Port,
