@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/bhuiyanmarzan/olx-api/internal/config"
+	"github.com/bhuiyanmarzan/olx-api/internal/platform/config"
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"

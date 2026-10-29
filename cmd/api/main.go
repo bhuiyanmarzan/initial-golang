@@ -32,7 +32,6 @@ func main() {
 	slog.SetDefault(logger)
 
 	fmt.Println("database connected")
-	fmt.Println("starting olx server...")
 
 	mux := http.NewServeMux()
 
@@ -59,7 +58,7 @@ func main() {
 		WriteTimeout: time.Second * 30,
 		IdleTimeout:  time.Second * 60,
 	}
-	log.Printf("server is listening on %s", srv.Addr)
+	fmt.Println("server is listening on", srv.Addr)
 	if err := srv.ListenAndServe(); err != nil {
 		log.Fatalf("server failed: %v", err)
 	}
