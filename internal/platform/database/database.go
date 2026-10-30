@@ -25,10 +25,6 @@ func DefaultPoolConfig() PoolConfig {
 	}
 }
 
-func Connect(databaseURL string) (*sql.DB, error) {
-	return ConnectWithPool(databaseURL, DefaultPoolConfig())
-}
-
 func ConnectWithPool(databaseURL string, pool PoolConfig) (*sql.DB, error) {
 	db, err := sql.Open("pgx", databaseURL)
 	if err != nil {

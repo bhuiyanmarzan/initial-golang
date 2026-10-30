@@ -1,18 +1,14 @@
 package health
 
-import (
-	"net/http"
-)
+import "net/http"
 
-// Module encapsulates the healthcheck domain.
-type Module struct{}
+type Module struct{ handler *Handler }
 
-// NewModule constructs a new health module.
-func NewModule() *Module {
-	return &Module{}
+func NewModule(database, redis Probe) *Module {
+	return &Module{handler: &Handler{service: NewService(database, redis)}}
 }
-
-// RegisterRoutes registers the health routes with the HTTP multiplexer.
 func (m *Module) RegisterRoutes(mux *http.ServeMux) {
-	mux.HandleFunc("GET /healthz", Handler)
+	mux.HandleFunc("GET /healthz", m.handler.Live)
+	mux.HandleFunc("GET /api/healthz", m.handler.Live)
+	mux.HandleFunc("GET /readyz", m.handler.Ready)
 }

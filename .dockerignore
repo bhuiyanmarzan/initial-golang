@@ -1,0 +1,9 @@
+.git
+.env
+.env.*
+!.env.sample
+bin
+tmp
+.agents
+.codex
+.aws

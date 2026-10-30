@@ -7,30 +7,17 @@ import (
 	"github.com/google/uuid"
 )
 
-type ctxKey int
-
-const (
-	requestIDKey ctxKey = iota
-)
-
-const (
-	requestId = "X-Request-ID"
-)
+type requestIDKey struct{}
 
 func RequestId(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id := r.Header.Get(requestId)
-		if id == "" {
-			id = uuid.NewString()
-		}
-
-		w.Header().Add(requestId, id)
-		ctx := context.WithValue(r.Context(), requestIDKey, id)
-		next.ServeHTTP(w, r.WithContext(ctx))
+		// Generate server-owned IDs; never trust unbounded client input in logs.
+		id := uuid.NewString()
+		w.Header().Set("X-Request-ID", id)
+		next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), requestIDKey{}, id)))
 	})
 }
-
 func RequestIDFromContext(ctx context.Context) string {
-	requestId := ctx.Value(requestIDKey).(string)
-	return requestId
+	id, _ := ctx.Value(requestIDKey{}).(string)
+	return id
 }
