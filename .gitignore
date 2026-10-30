@@ -1,2 +1,15 @@
-bin
+# Air
+tmp/
+
+# Build output
+bin/
+
+# Secrets
 .env
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store

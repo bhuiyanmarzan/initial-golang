@@ -17,6 +17,7 @@ const (
 	CodeForbidden        Code = "forbidden"
 	CodeConflict         Code = "conflict"
 	CodeRateLimited      Code = "rate_limited"
+	CodeUnavailable      Code = "unavailable"
 )
 
 type errorEnvelop struct {
